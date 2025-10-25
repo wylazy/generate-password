@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>安全的密码生成器 | Privacy Tools</title>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .container {
+      margin: 30px;
+      max-width: 600px;
+    }
+
+    .form-container {
+      background-color: #F8F8F8;
+      border: 1px #F0F0F0 solid;
+      padding: 10px;
+      margin-bottom: 20px;
+    }
+
+    .unsupported-browser-alert {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>
+      <a href="/">
+        <img src="img/logo.png" alt="privacytools.io" class="img-responsive">
+      </a>
+    </h1>
+    <h1>安全的密码生成器</h1>
+    <noscript>
+      <div class="alert alert-danger"><span class="glyphicon glyphicon-warning-sign"></span> <strong>等等</strong> 目前看起來你禁用了JavaScript功能。不幸的是，如果不启用它，这个工具就不能使用。</div>
+    </noscript>
+    <div class="alert alert-danger unsupported-browser-alert" id="unsupported-browser-alert">
+      <p>
+        <span class="glyphicon glyphicon-warning-sign"></span> <strong>等一下</strong> 看来你似乎正在使用一个<em>不支持的浏览器</em> (可能是Internet
+        Explorer吧...) 不幸的是, 除非进行浏览器升级否则这个工具无法使用，抱歉造成不便。
+      </p>
+    </div>
+    <div class="alert alert-info" role="alert">
+      <p>利用这个在线工具来生成安全而随机的密码。可使用的字符组都是方便使用者 -没有不明确难辨的字符如： i, l, 1, o, 0, 等等. 密码生成器是在客户端所完成，这表示没人可以取用你在此所生成的密码。 </p>
+    </div>
+    <div class="form-container clearfix ">
+      <div class="form-group">
+        <label>安全的密码:</label>
+        <div class="input-group">
+          <input type="text" class="form-control" id="password-input" onclick="this.focus();this.select()" readonly>
+          <span class="input-group-btn">
+            <button class="btn btn-default" id="generate-password-button" type="button">
+              <span class="glyphicon glyphicon-refresh"></span>
+              再生成另一个密码
+            </button>
+          </span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>密码长度:</label>
+        <select id="password-length" class="form-control">
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+          <option value="10">10</option>
+          <option value="11">11</option>
+          <option value="12">12</option>
+          <option value="13">13</option>
+          <option value="14">14</option>
+          <option value="15">15</option>
+          <option value="16">16</option>
+          <option value="17">17</option>
+          <option value="18">18</option>
+          <option value="19">19</option>
+          <option value="20"selected>20</option>
+          <option value="21">21</option>
+          <option value="22">22</option>
+          <option value="23">23</option>
+          <option value="24">24</option>
+          <option value="25">25</option>
+          <option value="26">26</option>
+          <option value="27">27</option>
+          <option value="28">28</option>
+          <option value="29">29</option>
+          <option value="30">30</option>
+          <option value="31">31</option>
+          <option value="32">32</option>
+        </select>
+      </div>
+      <div class="form-group collapse in" id="advancedOptions" aria-expanded="true">
+        <label>
+          <input type="checkbox" id="include-uppercase-chars-checkbox" checked> 英文大写
+        </label>
+        <label>
+          <input type="checkbox" id="include-lowercase-chars-checkbox" checked> 英文小写
+        </label>
+        <label>
+          <input type="checkbox" id="include-numbers-checkbox" checked> 阿拉伯数字
+        </label>
+        <label>
+          <input type="checkbox" id="include-special-chars-checkbox"> 特殊符号
+        </label>
+      </div>
+      <a class="btn btn-default pull-right" data-toggle="collapse" href="#advancedOptions" aria-expanded="true">
+        <span class="glyphicon glyphicon-menu-hamburger"></span>
+        高级选项
+      </a>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script>
+    var passwordGenerator = (function() {
+      var generateRandomNum = function(max) {
+        var crypto = window.crypto || window.msCrypto;
+        if (!crypto) {
+          throw new Error('Unsupported browser.');
+        }
+        // http://stackoverflow.com/a/18230432
+        var array = new Uint8Array(1);
+        crypto.getRandomValues(array);
+        var range = max + 1;
+        var max_range = 256;
+        if (array[0] >= Math.floor(max_range / range) * range)
+          return generateRandomNum(max);
+        return (array[0] % range);
+      };
+      var generatePassword = function(options) {
+        var uppercase = "ABCDEFGHJKMNPQRSTUVWXYZ";
+        var lowercase = "abcdefghjkmnpqrstuvwxyz";
+        var numbers = "23456789";
+        var special = "_.!@#$%&*?";
+        var candidates = '';
+        if (options.includeUppercaseChars) {
+          candidates += uppercase;
+        }
+        if (options.includeLowercaseChars) {
+          candidates += lowercase;
+        }
+        if (options.includeNumbers) {
+          candidates += numbers;
+        }
+        if (options.includeSpecialChars) {
+          candidates += special;
+        }
+        var password = "";
+        for (var i = 0; i < options.passwordLength; i++) {
+          var randomNum = generateRandomNum(candidates.length);
+          password += candidates.substring(randomNum, randomNum + 1);
+        }
+        return password;
+      };
+      return {
+        generatePassword: generatePassword
+      };
+    })();
+    (function() {
+      'use strict';
+      function getOptions() {
+        return {
+          passwordLength: $("#password-length").val(),
+          includeUppercaseChars: $("#include-uppercase-chars-checkbox").is(":checked"),
+          includeLowercaseChars: $("#include-lowercase-chars-checkbox").is(":checked"),
+          includeNumbers: $("#include-numbers-checkbox").is(":checked"),
+          includeSpecialChars: $("#include-special-chars-checkbox").is(":checked"),
+        };
+      }
+      function outputGeneratedPassword() {
+        var password;
+        try {
+          password = passwordGenerator.generatePassword(getOptions());
+        } catch (error) {
+          $("#unsupported-browser-alert").show();
+          return;
+        }
+        if (password === '') {
+          alert("Whoops. You unselected all the options. I don't know what characters you want. Click on the button entitled \"Advanced Options\" and enable some options then try again. Nice one");
+          return;
+        }
+        $("#password-input").val(password);
+      }
+      $(function() {
+        outputGeneratedPassword();
+        $("#generate-password-button").click(outputGeneratedPassword);
+      });
+    })();
+  </script>
+</body>
+
+</html>
